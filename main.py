@@ -31,6 +31,7 @@ if __name__ == '__main__':
     except IOError:
         print("An IOError has occurred!")
 
+    # data_files_path = 'C:\Users\EgorS\PycharmProjects\Automation_01\data_files'
     # Чтение из файла
     lst_of_str = []
     try:
