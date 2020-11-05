@@ -1,3 +1,4 @@
+import os
 import sys
 import fdb
 import pymysql
@@ -49,22 +50,31 @@ def write_to_file(path, sql_req):
         sys.exit("Data file(-s) already exist!")
 
 
-if __name__ == '__main__':
-    write_to_file(path='/home/user/first_name.txt',
-                  sql_req="SELECT ID,NAME FROM FIRST_NAME")
-    write_to_file(path='/home/user/last_name.txt',
-                  sql_req="SELECT ID,NAME FROM LAST_NAME")
-    # data_files_path = 'C:\Users\EgorS\PycharmProjects\Automation_01\data_files'
-    # Чтение из файла
+def read_file(path):
     lst_of_str = []
     try:
-        with open('/home/user/first_name.txt', 'r') as f:
+        with open(path, 'r') as f:
             for line in f:
                 lst_of_str.append([line.split('|')[0], line.split('|')[1]])
                 print(line)
     except IOError:
         print("An IOError has occurred!")
     print(lst_of_str)
+
+
+if __name__ == '__main__':
+    if os.path.exists('/home/user/first_name.txt') and os.path.exists('/home/user/first_name.txt'):
+        sys.exit("Data file(-s) already exist!")
+    else:
+        write_to_file(path='/home/user/first_name.txt',
+                      sql_req="SELECT ID,NAME FROM FIRST_NAME")
+        write_to_file(path='/home/user/last_name.txt',
+                      sql_req="SELECT ID,NAME FROM LAST_NAME")
+    # data_files_path = 'C:\Users\EgorS\PycharmProjects\Automation_01\data_files'
+    # Чтение из файла
+    read_file(path='/home/user/first_name.txt')
+    read_file(path='/home/user/last_name.txt')
+
 
     # MySQL #######################################################
     # Open database connection
