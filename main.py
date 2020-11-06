@@ -22,7 +22,7 @@ def get_con_mysql_db():
     return con_mysql_db_int
 
 
-def write_to_file(path, sql_req):
+def fb_to_file(path, sql_req):
     """Take data from firebird table and put in file"""
     try:
         with open(path, 'w') as f:  # W - for test; X - for prod;
@@ -32,7 +32,7 @@ def write_to_file(path, sql_req):
                 cur_fb_db.execute(sql_req)
                 for fieldDesc in cur_fb_db.description:
                     # f.write(fieldDesc[fdb.DESCRIPTION_NAME].ljust(fieldDesc[fdb.DESCRIPTION_DISPLAY_SIZE]) + '\n')  # , end="|"
-                    f.write(fieldDesc[fdb.DESCRIPTION_NAME] + '|')  # , end="|"
+                    f.write(fieldDesc[fdb.DESCRIPTION_NAME] + ';')  # , end="|"
                 f.write('\n')
                 # вывод данных таблицы
                 field_indices = range(len(cur_fb_db.description))
@@ -41,7 +41,7 @@ def write_to_file(path, sql_req):
                         field_value = str(row[fieldIndex])
                         # fieldMaxWidth = cur_fb_db.description[fieldIndex][fdb.DESCRIPTION_DISPLAY_SIZE]
                         # f.write(fieldValue.ljust(fieldMaxWidth) + '|')  # , end="|"
-                        f.write(field_value + '|')  # , end="|"
+                        f.write(field_value + ';')  # , end="|"
                     f.write('\n')
                 cur_fb_db.close()
             finally:
@@ -50,26 +50,28 @@ def write_to_file(path, sql_req):
         sys.exit("Data file(-s) already exist!")
 
 
-def read_file(path):
+def file_to_mysql(path):
     """Read text file to list of lists"""  # Оптимизировать на построчное чтение
+
+    ####################################################
     lst_of_str = []
     try:
         with open(path, 'r') as f:
             for line in f:
-                lst_of_str.append([line.split('|')[0], line.split('|')[1]])
+                lst_of_str.append([line.split(';')[0], line.split(';')[1]])
                 # print(line)  # for TS
     except IOError:
-        print("An IOError has occurred!")
-    # print(lst_of_str)  # for TS
-    return lst_of_str
+        print("Read data file error!")
+    print(lst_of_str)  # for TS
+    #####################################################
 
 
 if __name__ == '__main__':
     # Чтение в файл из firebird
-    write_to_file(path='/home/user/first_name.txt',
-                  sql_req="SELECT ID,NAME FROM FIRST_NAME")
-    write_to_file(path='/home/user/last_name.txt',
-                  sql_req="SELECT ID,NAME FROM LAST_NAME")
+    fb_to_file(path='/home/user/first_name.csv',
+               sql_req="SELECT id, first_name FROM FIRST_NAME")
+    fb_to_file(path='/home/user/last_name.csv',
+               sql_req="SELECT id, last_name FROM LAST_NAME")
     # if os.path.exists('/home/user/first_name.txt') and os.path.exists('/home/user/first_name.txt'):
     #     sys.exit("Data file(-s) already exist!")
     # else:
@@ -80,10 +82,8 @@ if __name__ == '__main__':
 
     # Чтение из файла
     # data_files_path = 'C:\Users\EgorS\PycharmProjects\Automation_01\data_files'
-    data_1 = read_file(path='/home/user/first_name.txt')
-    data_2 = read_file(path='/home/user/last_name.txt')
-    print(data_1)
-    print(data_2)
+    file_to_mysql(path='/home/user/first_name.csv')
+    file_to_mysql(path='/home/user/last_name.csv')
 
     # MySQL #######################################################
     # Open database connection
