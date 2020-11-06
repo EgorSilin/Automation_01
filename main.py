@@ -52,7 +52,7 @@ def fb_to_file(path, sql_req):
 
 
 def file_to_mysql():
-    """Read text file to list of lists"""  # Оптимизировать на построчное чтение
+    """Read text file to list of lists"""
     # MySQL #######################################################
     # Open database connection
     con_mysql_db = get_con_mysql_db()
@@ -76,13 +76,13 @@ def file_to_mysql():
             with open('/home/user/last_name.csv') as csv_file:
                 fn_file = csv.reader(csv_file, delimiter=';')
                 # sql = """INSERT INTO FIRST_LAST_NAME(id,first_name,last_name) VALUES(%s,%s,%s)"""
-                sql = """UPDATE FIRST_LAST_NAME SET last_name=%s WHERE id=%s)"""
+                sql = """UPDATE FIRST_LAST_NAME SET last_name = %s WHERE id = %s"""
                 next(fn_file)
                 for line in fn_file:
                     line = [None if cell == '' else cell for cell in line]
                     print(line)
                     print(line[1::-1])
-                    # cur_mysql_db.execute(sql, line[1::-1])
+                    cur_mysql_db.execute(sql, line[1::-1])
 
             con_mysql_db.commit()
         except:
@@ -111,6 +111,7 @@ def file_to_mysql():
 
 if __name__ == '__main__':
     # Чтение в файл из firebird
+    path_to_csv = '~/'
     fb_to_file(path='/home/user/first_name.csv',
                sql_req="SELECT id, first_name FROM FIRST_NAME")
     fb_to_file(path='/home/user/last_name.csv',
