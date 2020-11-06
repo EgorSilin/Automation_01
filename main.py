@@ -114,5 +114,3 @@ if __name__ == '__main__':
                    sql_req="SELECT id, last_name FROM LAST_NAME")
         file_to_mysql(path_to_csv)
         print('Script job - SUCCESS!')
-
-
