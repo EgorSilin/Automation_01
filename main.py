@@ -32,14 +32,22 @@ def fb_to_file(path, sql_req):
                 cur_fb_db = con_fb_db.cursor()
                 cur_fb_db.execute(sql_req)
                 for fieldDesc in cur_fb_db.description:
-                    f.write(fieldDesc[fdb.DESCRIPTION_NAME] + ';')
+                    # f.write(fieldDesc[fdb.DESCRIPTION_NAME] + ';')
+                    if fieldDesc != cur_fb_db.description[-1]:
+                        f.write(fieldDesc[fdb.DESCRIPTION_NAME] + ';')
+                    else:
+                        f.write(fieldDesc[fdb.DESCRIPTION_NAME])
                 f.write('\n')
                 # Insert data in CSV
                 field_indices = range(len(cur_fb_db.description))
                 for row in cur_fb_db:
                     for fieldIndex in field_indices:
                         field_value = str(row[fieldIndex])
-                        f.write(field_value + ';')
+                        # f.write(field_value + ';')
+                        if fieldIndex != field_indices[-1]:
+                            f.write(field_value + ';')
+                        else:
+                            f.write(field_value)
                     f.write('\n')
                 cur_fb_db.close()
             finally:
@@ -47,12 +55,11 @@ def fb_to_file(path, sql_req):
     except IOError as e:
         sys.exit(f"Data file(-s) already exist! Error: {e}")
     else:
-        print(f'Transfer from Firebird to CVS - SUCCESS!')
+        print(f'Transfer from Firebird to CVS: - SUCCESS!')
 
 
 def file_to_mysql(path_int):
     """Read text file to list of lists"""
-    # MySQL #######################################################
     # Open database connection
     con_mysql_db = get_con_mysql_db()
     try:
@@ -93,7 +100,6 @@ def file_to_mysql(path_int):
     finally:
         # disconnect from server
         con_mysql_db.close()
-    # MySQL END ###################################################################
 
 
 if __name__ == '__main__':
