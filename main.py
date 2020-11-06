@@ -63,31 +63,32 @@ def file_to_mysql():
         # execute SQL query using execute() method.
         try:
             # Execute the SQL command
-            cur_mysql_db.execute("show tables")
-            cur_mysql_db.execute("DELETE FROM FIRST_LAST_NAME;")
-            fn_file = csv.reader(open('/home/user/first_name.csv'), delimiter=';')
-            # sql = """INSERT INTO FIRST_LAST_NAME(id,first_name,last_name) VALUES(%i,%s,%s)"""
-            sql = """INSERT INTO FIRST_LAST_NAME(id,first_name,last_name) VALUES(%s,%s,%s)"""
-            next(fn_file)
-            for line in fn_file:
-                line = [None if cell == '' else cell for cell in line]
-                print(line)
-                print(int(line[0]), line[1], line[2])
-                # cur_mysql_db.execute(sql, line)
-                print(type(int(line[0])))
-                cur_mysql_db.execute(sql, [int(line[0]), line[1], line[2]])
+            with open('/home/user/first_name.csv') as csv_file:
+                cur_mysql_db.execute("DELETE FROM FIRST_LAST_NAME;")
+                fn_file = csv.reader(csv_file, delimiter=';')
+                # sql = """INSERT INTO FIRST_LAST_NAME(id,first_name,last_name) VALUES(%s,%s,%s)"""
+                sql = """INSERT INTO FIRST_LAST_NAME(id,first_name) VALUES(%s,%s)"""
+                next(fn_file)
+                for line in fn_file:
+                    line = [None if cell == '' else cell for cell in line]
+                    cur_mysql_db.execute(sql, line[0:2])
 
-            # cur.execute("SELECT * FROM cities WHERE id=%s", myid)
+            with open('/home/user/last_name.csv') as csv_file:
+                fn_file = csv.reader(csv_file, delimiter=';')
+                # sql = """INSERT INTO FIRST_LAST_NAME(id,first_name,last_name) VALUES(%s,%s,%s)"""
+                sql = """UPDATE FIRST_LAST_NAME SET last_name=%s WHERE id=%s)"""
+                next(fn_file)
+                for line in fn_file:
+                    line = [None if cell == '' else cell for cell in line]
+                    print(line)
+                    print(line[1::-1])
+                    # cur_mysql_db.execute(sql, line[1::-1])
 
             con_mysql_db.commit()
         except:
             # Rollback in case there is any error
             print(f'Transaction Error')
             cur_mysql_db.rollback()
-
-        # Fetch a single row using fetchone() method.
-        data = cur_mysql_db.fetchall()
-        print(data)
 
         cur_mysql_db.close()
     finally:
