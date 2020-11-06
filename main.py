@@ -66,14 +66,15 @@ def file_to_mysql():
             cur_mysql_db.execute("show tables")
             cur_mysql_db.execute("DELETE FROM FIRST_LAST_NAME;")
             fn_file = csv.reader(open('/home/user/first_name.csv'), delimiter=';')
-            # sql = """INSERT INTO FIRST_LAST_NAME(id,first_name,last_name) VALUES(%d,%s,%s)"""
-            sql = """INSERT INTO FIRST_LAST_NAME(id,first_name) VALUES(%i,%s,%s)"""
+            # sql = """INSERT INTO FIRST_LAST_NAME(id,first_name,last_name) VALUES(%i,%s,%s)"""
+            sql = """INSERT INTO FIRST_LAST_NAME(id,first_name,last_name) VALUES(%s,%s,%s)"""
             next(fn_file)
             for line in fn_file:
                 line = [None if cell == '' else cell for cell in line]
                 print(line)
                 print(int(line[0]), line[1], line[2])
                 # cur_mysql_db.execute(sql, line)
+                print(type(int(line[0])))
                 cur_mysql_db.execute(sql, [int(line[0]), line[1], line[2]])
 
             # cur.execute("SELECT * FROM cities WHERE id=%s", myid)
