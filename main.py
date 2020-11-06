@@ -32,26 +32,25 @@ def fb_to_file(path, sql_req):
                 cur_fb_db = con_fb_db.cursor()
                 cur_fb_db.execute(sql_req)
                 for fieldDesc in cur_fb_db.description:
-                    # f.write(fieldDesc[fdb.DESCRIPTION_NAME].ljust(fieldDesc[fdb.DESCRIPTION_DISPLAY_SIZE]) + '\n')  # , end="|"
-                    f.write(fieldDesc[fdb.DESCRIPTION_NAME] + ';')  # , end="|"
+                    f.write(fieldDesc[fdb.DESCRIPTION_NAME] + ';')
                 f.write('\n')
-                # вывод данных таблицы
+                # Insert data in CSV
                 field_indices = range(len(cur_fb_db.description))
                 for row in cur_fb_db:
                     for fieldIndex in field_indices:
                         field_value = str(row[fieldIndex])
-                        # fieldMaxWidth = cur_fb_db.description[fieldIndex][fdb.DESCRIPTION_DISPLAY_SIZE]
-                        # f.write(fieldValue.ljust(fieldMaxWidth) + '|')  # , end="|"
-                        f.write(field_value + ';')  # , end="|"
+                        f.write(field_value + ';')
                     f.write('\n')
                 cur_fb_db.close()
             finally:
                 con_fb_db.close()
-    except IOError:
-        sys.exit("Data file(-s) already exist!")
+    except IOError as e:
+        sys.exit(f"Data file(-s) already exist! Error: {e}")
+    else:
+        print(f'Transfer from Firebird to CVS - SUCCESS!')
 
 
-def file_to_mysql():
+def file_to_mysql(path_int):
     """Read text file to list of lists"""
     # MySQL #######################################################
     # Open database connection
@@ -63,7 +62,7 @@ def file_to_mysql():
         # execute SQL query using execute() method.
         try:
             # Execute the SQL command
-            with open('/home/user/first_name.csv') as csv_file:
+            with open(f'{path_int}first_name.csv') as csv_file:
                 cur_mysql_db.execute("DELETE FROM FIRST_LAST_NAME;")
                 fn_file = csv.reader(csv_file, delimiter=';')
                 # sql = """INSERT INTO FIRST_LAST_NAME(id,first_name,last_name) VALUES(%s,%s,%s)"""
@@ -73,61 +72,41 @@ def file_to_mysql():
                     line = [None if cell == '' else cell for cell in line]
                     cur_mysql_db.execute(sql, line[0:2])
 
-            with open('/home/user/last_name.csv') as csv_file:
+            with open(f'{path_int}last_name.csv') as csv_file:
                 fn_file = csv.reader(csv_file, delimiter=';')
                 # sql = """INSERT INTO FIRST_LAST_NAME(id,first_name,last_name) VALUES(%s,%s,%s)"""
                 sql = """UPDATE FIRST_LAST_NAME SET last_name = %s WHERE id = %s"""
                 next(fn_file)
                 for line in fn_file:
                     line = [None if cell == '' else cell for cell in line]
-                    print(line)
-                    print(line[1::-1])
                     cur_mysql_db.execute(sql, line[1::-1])
-
             con_mysql_db.commit()
-        except:
+        except Exception as e:
             # Rollback in case there is any error
-            print(f'Transaction Error')
+            print(f'Transaction Error: {e}')
             cur_mysql_db.rollback()
-
         cur_mysql_db.close()
+    except Exception as e:
+        print({e})
+    else:
+        print('Transfer from CVS to Mysql - SUCCESS!')
     finally:
         # disconnect from server
         con_mysql_db.close()
     # MySQL END ###################################################################
 
-    # ####################################################
-    # lst_of_str = []
-    # try:
-    #     with open(path, 'r') as f:
-    #         for line in f:
-    #             lst_of_str.append([line.split(';')[0], line.split(';')[1]])
-    #             # print(line)  # for TS
-    # except IOError:
-    #     print("Read data file error!")
-    # print(lst_of_str)  # for TS
-    # #####################################################
-
 
 if __name__ == '__main__':
-    # Чтение в файл из firebird
-    path_to_csv = '~/'
-    fb_to_file(path='/home/user/first_name.csv',
-               sql_req="SELECT id, first_name FROM FIRST_NAME")
-    fb_to_file(path='/home/user/last_name.csv',
-               sql_req="SELECT id, last_name FROM LAST_NAME")
-    # if os.path.exists('/home/user/first_name.txt') and os.path.exists('/home/user/first_name.txt'):
-    #     sys.exit("Data file(-s) already exist!")
-    # else:
-    #     write_to_file(path='/home/user/first_name.txt',
-    #                   sql_req="SELECT ID,NAME FROM FIRST_NAME")
-    #     write_to_file(path='/home/user/last_name.txt',
-    #                   sql_req="SELECT ID,NAME FROM LAST_NAME")
-
-    # Чтение из файла
-    # data_files_path = 'C:\Users\EgorS\PycharmProjects\Automation_01\data_files'
-    # file_to_mysql(path='/home/user/first_name.csv')
-    # file_to_mysql(path='/home/user/last_name.csv')
-    file_to_mysql()
+    path_to_csv = '/home/user/'
+    if (os.path.exists(f'{path_to_csv}first_name.txt') or os.path.exists(f'{path_to_csv}last_name.txt')) is True:
+        # True - for test; False - for prod;
+        sys.exit("Data file(-s) already exist!")
+    else:
+        fb_to_file(path=f'{path_to_csv}first_name.csv',
+                   sql_req="SELECT id, first_name FROM FIRST_NAME")
+        fb_to_file(path=f'{path_to_csv}last_name.csv',
+                   sql_req="SELECT id, last_name FROM LAST_NAME")
+        file_to_mysql(path_to_csv)
+        print('Script job - SUCCESS!')
 
 
