@@ -26,13 +26,12 @@ def get_con_mysql_db():
 def fb_to_file(path, sql_req):
     """Take data from firebird table and put in file"""
     try:
-        with open(path, 'w') as f:  # W - for test; X - for prod;
+        with open(path, 'x') as f:  # w - for test; x - for prod;
             con_fb_db = get_con_fb_db()
             try:
                 cur_fb_db = con_fb_db.cursor()
                 cur_fb_db.execute(sql_req)
                 for fieldDesc in cur_fb_db.description:
-                    # f.write(fieldDesc[fdb.DESCRIPTION_NAME] + ';')
                     if fieldDesc != cur_fb_db.description[-1]:
                         f.write(fieldDesc[fdb.DESCRIPTION_NAME] + ';')
                     else:
@@ -43,7 +42,6 @@ def fb_to_file(path, sql_req):
                 for row in cur_fb_db:
                     for fieldIndex in field_indices:
                         field_value = str(row[fieldIndex])
-                        # f.write(field_value + ';')
                         if fieldIndex != field_indices[-1]:
                             f.write(field_value + ';')
                         else:
@@ -104,9 +102,9 @@ def file_to_mysql(path_int):
 
 if __name__ == '__main__':
     path_to_csv = '/home/user/'
-    if (os.path.exists(f'{path_to_csv}first_name.txt') or os.path.exists(f'{path_to_csv}last_name.txt')) is True:
-        # True - for test; False - for prod;
-        sys.exit("Data file(-s) already exist!")
+    if (os.path.isfile(f'{path_to_csv}first_name.csv') or os.path.isfile(f'{path_to_csv}last_name.csv')) is True:
+        # False - for test; True - for prod;
+        sys.exit("Data file(-s) already exist!!!")
     else:
         fb_to_file(path=f'{path_to_csv}first_name.csv',
                    sql_req="SELECT id, first_name FROM FIRST_NAME")
