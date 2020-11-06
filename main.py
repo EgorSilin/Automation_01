@@ -1,3 +1,4 @@
+import csv
 import os
 import sys
 import fdb
@@ -50,20 +51,60 @@ def fb_to_file(path, sql_req):
         sys.exit("Data file(-s) already exist!")
 
 
-def file_to_mysql(path):
+def file_to_mysql():
     """Read text file to list of lists"""  # Оптимизировать на построчное чтение
-
-    ####################################################
-    lst_of_str = []
+    # MySQL #######################################################
+    # Open database connection
+    con_mysql_db = get_con_mysql_db()
     try:
-        with open(path, 'r') as f:
-            for line in f:
-                lst_of_str.append([line.split(';')[0], line.split(';')[1]])
-                # print(line)  # for TS
-    except IOError:
-        print("Read data file error!")
-    print(lst_of_str)  # for TS
-    #####################################################
+        # prepare a cursor object using cursor() method
+        cur_mysql_db = con_mysql_db.cursor()
+
+        # execute SQL query using execute() method.
+        try:
+            # Execute the SQL command
+            cur_mysql_db.execute("show tables")
+            cur_mysql_db.execute("DELETE FROM FIRST_LAST_NAME;")
+            fn_file = csv.reader(open('/home/user/first_name.csv'), delimiter=';')
+            # sql = """INSERT INTO FIRST_LAST_NAME(id,first_name,last_name) VALUES(%d,%s,%s)"""
+            sql = """INSERT INTO FIRST_LAST_NAME(id,first_name) VALUES(%i,%s,%s)"""
+            next(fn_file)
+            for line in fn_file:
+                line = [None if cell == '' else cell for cell in line]
+                print(line)
+                print(int(line[0]), line[1], line[2])
+                # cur_mysql_db.execute(sql, line)
+                cur_mysql_db.execute(sql, [int(line[0]), line[1], line[2]])
+
+            # cur.execute("SELECT * FROM cities WHERE id=%s", myid)
+
+            con_mysql_db.commit()
+        except:
+            # Rollback in case there is any error
+            print(f'Transaction Error')
+            cur_mysql_db.rollback()
+
+        # Fetch a single row using fetchone() method.
+        data = cur_mysql_db.fetchall()
+        print(data)
+
+        cur_mysql_db.close()
+    finally:
+        # disconnect from server
+        con_mysql_db.close()
+    # MySQL END ###################################################################
+
+    # ####################################################
+    # lst_of_str = []
+    # try:
+    #     with open(path, 'r') as f:
+    #         for line in f:
+    #             lst_of_str.append([line.split(';')[0], line.split(';')[1]])
+    #             # print(line)  # for TS
+    # except IOError:
+    #     print("Read data file error!")
+    # print(lst_of_str)  # for TS
+    # #####################################################
 
 
 if __name__ == '__main__':
@@ -82,33 +123,8 @@ if __name__ == '__main__':
 
     # Чтение из файла
     # data_files_path = 'C:\Users\EgorS\PycharmProjects\Automation_01\data_files'
-    file_to_mysql(path='/home/user/first_name.csv')
-    file_to_mysql(path='/home/user/last_name.csv')
+    # file_to_mysql(path='/home/user/first_name.csv')
+    # file_to_mysql(path='/home/user/last_name.csv')
+    file_to_mysql()
 
-    # MySQL #######################################################
-    # Open database connection
-    con_mysql_db = get_con_mysql_db()
-    try:
-        # prepare a cursor object using cursor() method
-        cur_mysql_db = con_mysql_db.cursor()
 
-        # execute SQL query using execute() method.
-        try:
-            # Execute the SQL command
-            cur_mysql_db.execute("show tables")
-            cur_mysql_db.execute("DELETE FROM FIRST_LAST_NAME;")
-            # Commit your changes in the database
-            con_mysql_db.commit()
-        except:
-            # Rollback in case there is any error
-            print(f'Transaction Error')
-            cur_mysql_db.rollback()
-
-        # Fetch a single row using fetchone() method.
-        data = cur_mysql_db.fetchall()
-        print(data)
-
-        cur_mysql_db.close()
-    finally:
-        # disconnect from server
-        con_mysql_db.close()
